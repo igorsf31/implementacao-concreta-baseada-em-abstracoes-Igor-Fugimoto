@@ -1,0 +1,68 @@
+<?php
+namespace Alfa;
+
+abstract class Entidade implements Abstracao\ClasseEntidade {
+    public function create($colunas, $valores) {
+        $entidade = substr(__CLASS__, strrpos(__CLASS__, '\\') + 1);
+        $atributos = get_object_vars($this);
+        $colunas = array_keys($atributos);
+        $valores = array_values($atributos);
+        $sql = "INSERT INTO $entidade (" . implode(',', $colunas) . ") VALUES ('" . implode("','", $valores) . "')";
+        echo "Classe Entidade CREATE:". $sql;
+        if (!mysqli_query(self::$dependencia->conexao, $sql)) {
+                throw new \Exception(mysqli_error(self::$dependencia->conexao));
+        }
+            
+    }
+
+    public function delete($clausula) {
+        $entidade = substr(__CLASS__, strrpos(__CLASS__, '\\') + 1);
+        $sql = "DELETE FROM " . $entidade . " WHERE $clausula";
+        echo "Classe Entidade DELETE:". $sql;
+        if (!mysqli_query(self::$servidor->conexao, $sql)) {
+            throw new \Exception(mysqli_error(self::$servidor->conexao));
+        }
+    }
+
+    public function getNome() {
+        
+    }
+
+    public function retrieve($colunas, $clausula) {
+        $entidade = substr(__CLASS__, strrpos(__CLASS__, '\\') + 1);
+        $sql = "SELECT " . implode(', ', $colunas) . " FROM " . $entidade . " WHERE $clausula";
+        $result = mysqli_query(self::$servidor->conexao, $sql);
+        echo "Classe Entidade RETRIEVE:". $sql;
+
+        if (!$result) {
+            throw new \Exception(mysqli_error(self::$servidor->conexao));
+        }
+        //echo'aki1';
+        return $result->fetch_array();
+    }
+
+    public function setNome($nome) {
+        
+    }
+
+    public function update($colunas, $valores, $clausula) {
+        $entidade = substr(__CLASS__, strrpos(__CLASS__, '\\') + 1);
+        $atributos = get_object_vars($this);
+        $colunas = array_keys($atributos);
+        $valores = "";
+        for ($i=0; $i<count($colunas); $i++) {
+            $temp = $colunas[$i];
+            $valores = $valores . $colunas[$i] . " = '" . $atributos[$temp] . "'";
+            if (count($colunas) <> $i+1) {
+                $valores = $valores . ", ";                        
+            }
+        }
+        $sql = "UPDATE $entidade SET $valores WHERE $clausula";
+        echo "Classe Entidade UPDATE:". $sql;
+        if (!mysqli_query(self::$servidor->conexao, $sql)) {
+                throw new \Exception(mysqli_error(self::$servidor->conexao));
+        }
+    }
+
+}
+
